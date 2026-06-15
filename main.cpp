@@ -18,7 +18,7 @@
 #define MAX_TEMPO 25
 
 #define TAMANHO_TORNEIO 3
-#define QTD_GERACOES 10
+#define QTD_GERACOES 100
 #define POPULACAO 10
 #define TAXA_CROSSOVER 0.8
 #define TAXA_MUTACAO 0.05
@@ -36,10 +36,10 @@ struct Lote
 
 struct Hab
 {
-    //Vai conter o id das m·quinas que ir„o trabalhar com cada lote
+    //Vai conter o id das m√°quinas que ir√£o trabalhar com cada lote
     vector<int> lotes;
 
-    //ContÈm o maior valor gasto por uma m·quina para o habitante
+    //Cont√©m o maior valor gasto por uma m√°quina para o habitante
     int fitness;
 };
 
@@ -55,16 +55,16 @@ vector<Lote> parametrosIniciais(int* numLotes, int* numMaquinas) {
     do {
         cout << "Digite a quantidade de maquinas: ";
         cin >> *numMaquinas;
-    } while (*numLotes < MIN_LOTES || *numLotes > MAX_LOTES);
+    } while (*numMaquinas < MIN_MAQUINAS || *numMaquinas > MAX_MAQUINAS);
 
     for (int i = 0; i < *numLotes; i++) {
         do {
-            cout << "Quantidade de itens do " << (i + 1) << "∫ lote: ";
+            cout << "Quantidade de itens do " << (i + 1) << "¬∫ lote: ";
             cin >> lote.qtd;
         } while (lote.qtd < MIN_SAPATOS || lote.qtd > MAX_SAPATOS);
 
         do {
-            cout << "Tempo gasto em cada item do " << (i + 1) << "∫ lote: ";
+            cout << "Tempo gasto em cada item do " << (i + 1) << "¬∫ lote: ";
             cin >> lote.tempoUnit;
         } while (lote.tempoUnit < MIN_TEMPO || lote.tempoUnit > MAX_TEMPO);
 
@@ -88,6 +88,7 @@ vector<Hab> geracaoInicial(int numLotes, int numMaquinas, vector<Lote> lotes) {
             habitante.lotes.push_back(maquina);
         }
         habitantes.push_back(habitante);
+        habitante.lotes.clear();
     }
 
     return habitantes;
@@ -229,53 +230,49 @@ Hab algoritmoGenetico(int numLotes, int numMaquinas, vector<Lote> &lotes, vector
     return populacao[0];
 }
 
-//void exibirResultado(
-//    const Hab& melhor,
-//    const vector<Lote>& lotes,
-//    int numMaquinas)
-//{
-//    vector<int> carga(numMaquinas, 0);
-//
-//    cout << "\n===== MELHOR SOLUCAO =====\n";
-//    cout << "Makespan: "
-//        << melhor.fitness
-//        << "\n\n";
-//
-//    for (int maq = 0; maq < numMaquinas; maq++)
-//    {
-//        cout << "Maquina "
-//            << maq
-//            << ":\n";
-//
-//        bool possuiLote = false;
-//
-//        for (int i = 0; i < lotes.size(); i++)
-//        {
-//            if (melhor.lotes[i] == maq)
-//            {
-//                possuiLote = true;
-//
-//                cout
-//                    << "  Lote "
-//                    << lotes[i].id
-//                    << " (tempo "
-//                    << lotes[i].tempoTotal
-//                    << ")\n";
-//
-//                carga[maq] +=
-//                    lotes[i].tempoTotal;
-//            }
-//        }
-//
-//        if (!possuiLote)
-//            cout << "  Nenhum lote\n";
-//
-//        cout
-//            << "  Tempo total: "
-//            << carga[maq]
-//            << "\n\n";
-//    }
-//}
+void exibirResultado(const Hab& melhor, const vector<Lote>& lotes, int numMaquinas) {
+    vector<int> carga(numMaquinas, 0);
+
+    cout << "\n===== MELHOR SOLUCAO =====\n";
+    cout << "Makespan: "
+        << melhor.fitness
+        << "\n\n";
+
+    for (int maq = 0; maq < numMaquinas; maq++)
+    {
+        cout << "Maquina "
+            << maq
+            << ":\n";
+
+        bool possuiLote = false;
+
+        for (int i = 0; i < lotes.size(); i++)
+        {
+            if (melhor.lotes[i] == maq)
+            {
+                possuiLote = true;
+
+                cout
+                    << "  Lote "
+                    << lotes[i].id
+                    << " (tempo "
+                    << lotes[i].tempoTotal
+                    << ")\n";
+
+                carga[maq] +=
+                    lotes[i].tempoTotal;
+            }
+        }
+
+        if (!possuiLote)
+            cout << "  Nenhum lote\n";
+
+        cout
+            << "  Tempo total: "
+            << carga[maq]
+            << "\n\n";
+    }
+}
 
 // ================= JSON =================
 void salvarJSON(
@@ -325,7 +322,7 @@ int main()
 
     auto resultado = algoritmoGenetico(numLotes, numMaquinas, lotes, gInicial);
 
-    //exibirResultado(resultado, lotes, numMaquinas);
+    exibirResultado(resultado, lotes, numMaquinas);
 
     //salvarJSON(lotes, historico);
     //
