@@ -1,59 +1,217 @@
-body {
-  font-family: Arial, sans-serif;
-  background: #ffffff;
+* {
   margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-/* ================= CONTAINERS ================= */
+body {
+  background: #f5f7fa;
+  font-family: Arial, Helvetica, sans-serif;
+  padding: 2rem;
+}
 
-#app {
+header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+#titulo-geracao {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+/* ================= POPULAÇÃO ================= */
+
+#populacao {
+  display: grid;
+
+  grid-template-columns:
+    repeat(5, minmax(220px, 1fr));
+
+  gap: 1rem;
+
+  margin-bottom: 3rem;
+}
+
+/* ================= INDIVÍDUO ================= */
+
+.individuo {
+  background: white;
+
+  border-radius: 12px;
+
+  padding: 1rem;
+
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.08);
+
+  transition: 0.2s;
+}
+
+.individuo:hover {
+  transform: translateY(-3px);
+}
+
+.individuo h3 {
+  text-align: center;
+
+  margin-bottom: 1rem;
+
+  color: #333;
+}
+
+/* ================= MÁQUINAS ================= */
+
+.maquinas {
   display: flex;
-  flex-direction: column;
-  gap: 20px;
-  padding: 20px;
+  flex-wrap: wrap;
+
+  gap: 0.5rem;
 }
 
-#lotes-container,
-#lotes-container-ordenado {
+.maquina {
+  width: 100px;
+
+  min-height: 90px;
+
+  border: 1px solid #ddd;
+
+  border-radius: 10px;
+
+  padding: 0.5rem;
+
+  background: #fafafa;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+}
+
+.maquina h4 {
+  font-size: 0.8rem;
+
+  margin-bottom: 0.3rem;
+  font-weight: bold;
+  font-size:medium;
+  text-align: center;
+}
+
+.maquina::before {
+  content: "";
+
+  width: 40px;
+  height: 40px;
+
+  background-image: url("./assets/machine.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* ================= FITNESS ================= */
+
+.fitness {
+  margin-bottom: 1rem;
+
+  text-align: center;
+
+  font-weight: bold;
+
+  color: #4a2d70;
+}
+
+/* ================= MELHOR ================= */
+
+#melhor-container {
+  margin-top: 2rem;
+}
+
+#melhor-container h2 {
+  text-align: center;
+
+  margin-bottom: 1rem;
+}
+
+#lotes-container h2 {
+  text-align: center;
+
+  margin-bottom: 1rem;
+}
+
+#melhor .individuo {
+  border: 3px solid #4a2d70;
+
+  background: #dcc4fa;
+}
+
+/* ================= PAGINAÇÃO ================= */
+
+#paginacao {
+  display: flex;
+
+  justify-content: center;
+
+  gap: 0.5rem;
+
+  margin-top: 2rem;
+
+  flex-wrap: wrap;
+}
+
+#paginacao button {
+  border: none;
+
+  padding: 0.5rem 0.8rem;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+
+  background: #e5e7eb;
+}
+
+#paginacao button:hover {
+  background: #d1d5db;
+}
+
+#paginacao button.ativo {
+  background: #4a2d70;
+
+  color: white;
+}
+
+#controles {
+  display: flex;
+
+  justify-content: center;
+
+  gap: 12px;
+
+  margin: 20px 0;
+}
+
+#controles button {
+  border: none;
+
+  padding: 12px 20px;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+
+  font-size: 1rem;
+}
+
+#lotes {
+  align-items: center;
   display: flex;
   gap: 10px;
   padding: 20px;
   flex-wrap: wrap;
   border-radius: 10px;
 }
-
-/* ================= MAQUINAS ================= */
-
-.maquina {
-  background: #4a2d70;
-  padding: 15px;
-  border-radius: 10px;
-  display: flex;
-  gap: 15px;
-  align-items: center;
-  justify-content: flex-start;
-  overflow-x: auto;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.maquina-info {
-  font-weight: bold;
-  width: 180px;
-  flex-shrink: 0;
-  text-align: center;
-  background: #4a2d70;
-  padding: 10px 20px;
-  border-radius: 8px;
-  color: white;
-}
-
-.maquina-img {
-  width: 100%;
-  margin: 0 auto;
-  display: block;
-}
-
-/* ================= LOTES ================= */
 
 .lote {
   background: #0cc0df;
@@ -74,18 +232,28 @@ body {
   justify-self: center;
 }
 
-/* ================= TITULOS ================= */
+/* ================= RESPONSIVO ================= */
 
-p {
-  margin-left: 20px;
-  font-size: medium;
+@media (max-width: 1400px) {
+  #populacao {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
-h1 {
-  margin-left: 20px;
-  color:#4a2d70;
+@media (max-width: 1100px) {
+  #populacao {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
-h2 {
-  margin-left: 20px;
+@media (max-width: 800px) {
+  #populacao {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 500px) {
+  #populacao {
+    grid-template-columns: 1fr;
+  }
 }

@@ -1,35 +1,46 @@
 <!doctype html>
-<html lang="pt-br">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <title>Visualização LPT</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Algoritmo Genético</title>
+
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <h1>Algoritmo LPT</h1>
+    <header>
+      <h1>Evolução das Gerações</h1>
+    </header>
 
-    <h2>Lotes</h2>
-    <p>
-      Gerados aleatoriamente pelo programa, cada lote possui uma quantidade de
-      sapatos e cada sapato possui um tempo específico de colagem.
-    </p>
-    <div id="lotes-container"></div>
+    <main>
+      <section id="lotes-container">
+        <h2>Lotes de Produção</h2>
 
-    <h2>Lotes Ordenados</h2>
-    <p>
-      O algoritmo ordena os lotes de acordo com o tempo total de colagem,
-      calculado pela multiplicação do tempo unitário pela quantidade de sapatos,
-      de forma decrescente.
-    </p>
-    <div id="lotes-container-ordenado"></div>
+        <div id="lotes"></div>
+      </section>
 
-    <h2>Distribuição</h2>
-    <p>
-      Por fim, o algoritmo realiza a distribuição de acordo com o tempo de
-      processamento, em ordem decrescente, e atribui cada tarefa à máquina com a
-      menor carga atual.
-    </p>
-    <div id="app"></div>
+      <section id="geracao-info">
+        <h2 id="titulo-geracao"></h2>
+      </section>
+
+      <section id="populacao"></section>
+
+      <section id="melhor-container">
+        <h2>Melhor Indivíduo</h2>
+
+        <div id="melhor"></div>
+      </section>
+
+      <div id="controles">
+        <button id="btn-anterior">⏮</button>
+
+        <button id="btn-play">▶</button>
+
+        <button id="btn-proximo">⏭</button>
+      </div>
+
+      <nav id="paginacao"></nav>
+    </main>
 
     <script src="script.js"></script>
   </body>

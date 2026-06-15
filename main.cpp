@@ -18,7 +18,7 @@
 #define MAX_TEMPO 25
 
 #define TAMANHO_TORNEIO 3
-#define QTD_GERACOES 100
+#define QTD_GERACOES 10
 #define POPULACAO 10
 #define TAXA_CROSSOVER 0.8
 #define TAXA_MUTACAO 0.05
@@ -42,6 +42,46 @@ struct Hab
     // Contém o maior valor gasto por uma máquina para o habitante
     int fitness;
 };
+
+// estruturas para o front
+struct EventoTorneio
+{
+    vector<int> fitnessParticipantes;
+    int fitnessVencedor;
+};
+
+struct EventoCrossover
+{
+    vector<int> pai1;
+    vector<int> pai2;
+
+    int corte;
+
+    vector<int> filho1;
+    vector<int> filho2;
+};
+
+struct EventoMutacao
+{
+    int individuo;
+    int gene;
+
+    int antes;
+    int depois;
+};
+
+struct HistoricoGeracao
+{
+    vector<Hab> populacao;
+
+    vector<EventoTorneio> torneios;
+    vector<EventoCrossover> crossovers;
+    vector<EventoMutacao> mutacoes;
+
+    Hab melhor;
+};
+
+vector<HistoricoGeracao> historico;
 
 vector<Lote> parametrosIniciais(int *numLotes, int *numMaquinas)
 {
@@ -179,15 +219,23 @@ vector<Hab> avaliarPopulacao(vector<Hab> populacao, vector<Lote> &lotes, int num
     return populacao;
 }
 
-Hab selecionarPai(vector<Hab> &populacao)
+Hab selecionarPai(vector<Hab> &populacao, HistoricoGeracao &hist)
 {
     int k = TAMANHO_TORNEIO;
 
+    EventoTorneio evento;
+
     Hab melhor = populacao[rand() % populacao.size()];
+
+    evento.fitnessParticipantes.push_back(
+        melhor.fitness);
 
     for (int i = 1; i < k; i++)
     {
         Hab candidato = populacao[rand() % populacao.size()];
+
+        evento.fitnessParticipantes.push_back(
+            candidato.fitness);
 
         if (candidato.fitness < melhor.fitness)
         {
@@ -195,23 +243,27 @@ Hab selecionarPai(vector<Hab> &populacao)
         }
     }
 
+    evento.fitnessVencedor = melhor.fitness;
+
+    hist.torneios.push_back(evento);
+
     return melhor;
 };
 
-vector<Hab> torneio(vector<Hab> &populacao)
+vector<Hab> torneio(vector<Hab> &populacao, HistoricoGeracao &hist)
 {
     vector<Hab> pais;
 
     while (pais.size() < POPULACAO)
     {
         pais.push_back(
-            selecionarPai(populacao));
+            selecionarPai(populacao, hist));
     }
 
     return pais;
 }
 
-vector<Hab> crossover(vector<Hab> pais)
+vector<Hab> crossover(vector<Hab> pais, HistoricoGeracao &hist)
 {
     vector<Hab> filhos;
 
@@ -225,9 +277,16 @@ vector<Hab> crossover(vector<Hab> pais)
 
         Hab f1, f2;
 
+        EventoCrossover evento;
+
+        evento.pai1 = p1.lotes;
+        evento.pai2 = p2.lotes;
+
         if (((double)rand() / RAND_MAX) < TAXA_CROSSOVER)
         {
             int corte = rand() % tamanho;
+
+            evento.corte = corte;
 
             for (int i = 0; i < tamanho; i++)
             {
@@ -247,9 +306,16 @@ vector<Hab> crossover(vector<Hab> pais)
         }
         else
         {
+            evento.corte = -1;
+
             f1 = p1;
             f2 = p2;
         }
+
+        evento.filho1 = f1.lotes;
+        evento.filho2 = f2.lotes;
+
+        hist.crossovers.push_back(evento);
 
         filhos.push_back(f1);
 
@@ -262,29 +328,48 @@ vector<Hab> crossover(vector<Hab> pais)
     return filhos;
 };
 
-vector<Hab> mutacao(vector<Hab> populacao, int numMaquinas)
+vector<Hab> mutacao(
+    vector<Hab> populacao,
+    int numMaquinas,
+    HistoricoGeracao &hist)
 {
-    for (auto &ind : populacao)
+    for (int i = 0; i < populacao.size(); i++)
     {
-        for (auto &gene : ind.lotes)
+        for (int j = 0; j < populacao[i].lotes.size(); j++)
         {
             if (((double)rand() / RAND_MAX) < TAXA_MUTACAO)
             {
-                gene = rand() % numMaquinas;
+                EventoMutacao evento;
+
+                evento.individuo = i;
+                evento.gene = j;
+
+                evento.antes = populacao[i].lotes[j];
+
+                populacao[i].lotes[j] =
+                    rand() % numMaquinas;
+
+                evento.depois = populacao[i].lotes[j];
+
+                hist.mutacoes.push_back(evento);
             }
         }
     }
 
     return populacao;
-};
+}
 
-vector<Hab> proximaGeracao(vector<Hab> populacao, vector<Lote> &lotes, int numMaquinas)
+vector<Hab> proximaGeracao(vector<Hab> populacao, vector<Lote> &lotes, int numMaquinas, HistoricoGeracao &hist)
 {
-    auto pais = torneio(populacao);
+    hist.populacao = populacao;
 
-    auto filhos = crossover(pais);
-    filhos = mutacao(filhos, numMaquinas);
+    auto pais = torneio(populacao, hist);
+
+    auto filhos = crossover(pais, hist);
+    filhos = mutacao(filhos, numMaquinas, hist);
     filhos = avaliarPopulacao(filhos, lotes, numMaquinas);
+
+    hist.melhor = filhos[0];
 
     return filhos;
 }
@@ -295,7 +380,9 @@ Hab algoritmoGenetico(int numLotes, int numMaquinas, vector<Lote> &lotes, vector
 
     for (int i = 0; i < QTD_GERACOES; i++)
     {
-        auto filhos = proximaGeracao(populacao, lotes, numMaquinas);
+        HistoricoGeracao geracao;
+
+        auto filhos = proximaGeracao(populacao, lotes, numMaquinas, geracao);
 
         filhos.push_back(populacao[0]);
 
@@ -304,6 +391,8 @@ Hab algoritmoGenetico(int numLotes, int numMaquinas, vector<Lote> &lotes, vector
         filhos.resize(POPULACAO);
 
         populacao = filhos;
+
+        historico.push_back(geracao);
     }
 
     return populacao[0];
@@ -355,30 +444,46 @@ void exibirResultado(const Hab &melhor, const vector<Lote> &lotes, int numMaquin
 }
 
 // ================= JSON =================
-void salvarJSON(
-    const Hab &melhor,
-    const vector<Lote> &lotes)
+void salvarJSON(const vector<HistoricoGeracao> &historico, const vector<Lote> &lotes, int numLotes, int numMaquinas)
 {
     ofstream file("dados.json");
 
     file << "{\n";
 
-    file << "\"fitness\": "
-         << melhor.fitness
+    file << "\"configuracao\": {\n";
+
+    file << "\"numLotes\": "
+         << numLotes
          << ",\n";
 
-    file << "\"alocacao\": [\n";
+    file << "\"numMaquinas\": "
+         << numMaquinas
+         << "\n";
+
+    file << "},\n";
+
+    file << "\"lotes\": [\n";
 
     for (int i = 0; i < lotes.size(); i++)
     {
-        file
-            << "{"
-            << "\"lote\":"
-            << lotes[i].id
-            << ","
-            << "\"maquina\":"
-            << melhor.lotes[i]
-            << "}";
+        file << "{";
+
+        file << "\"id\": "
+             << lotes[i].id
+             << ",";
+
+        file << "\"qtd\": "
+             << lotes[i].qtd
+             << ",";
+
+        file << "\"tempoUnit\": "
+             << lotes[i].tempoUnit
+             << ",";
+
+        file << "\"tempoTotal\": "
+             << lotes[i].tempoTotal;
+
+        file << "}";
 
         if (i < lotes.size() - 1)
             file << ",";
@@ -386,9 +491,196 @@ void salvarJSON(
         file << "\n";
     }
 
-    file << "]\n";
+    file << "],\n";
+
+    for (int g = 0; g < historico.size(); g++)
+    {
+        const auto &geracao = historico[g];
+
+        file << "\"geracao_" << (g + 1) << "\": {\n";
+
+        // ================= POPULACAO =================
+        file << "\"populacao\": [\n";
+
+        for (int i = 0; i < geracao.populacao.size(); i++)
+        {
+            const auto &ind = geracao.populacao[i];
+
+            file << "{";
+
+            file << "\"fitness\": "
+                 << ind.fitness
+                 << ",";
+
+            file << "\"cromossomo\": [";
+
+            for (int j = 0; j < ind.lotes.size(); j++)
+            {
+                file << ind.lotes[j];
+
+                if (j < ind.lotes.size() - 1)
+                    file << ",";
+            }
+
+            file << "]";
+
+            file << "}";
+
+            if (i < geracao.populacao.size() - 1)
+                file << ",";
+
+            file << "\n";
+        }
+
+        file << "],\n";
+
+        // ================= TORNEIO =================
+        file << "\"torneio\": [\n";
+
+        for (int i = 0; i < geracao.torneios.size(); i++)
+        {
+            const auto &t = geracao.torneios[i];
+
+            file << "{";
+
+            file << "\"participantes\":[";
+
+            for (int j = 0; j < t.fitnessParticipantes.size(); j++)
+            {
+                file << t.fitnessParticipantes[j];
+
+                if (j < t.fitnessParticipantes.size() - 1)
+                    file << ",";
+            }
+
+            file << "],";
+
+            file << "\"vencedor\":"
+                 << t.fitnessVencedor;
+
+            file << "}";
+
+            if (i < geracao.torneios.size() - 1)
+                file << ",";
+
+            file << "\n";
+        }
+
+        file << "],\n";
+
+        // ================= CROSSOVER =================
+        file << "\"crossover\": [\n";
+
+        for (int i = 0; i < geracao.crossovers.size(); i++)
+        {
+            const auto &c = geracao.crossovers[i];
+
+            file << "{";
+
+            file << "\"pai1\": [";
+            for (int j = 0; j < c.pai1.size(); j++)
+            {
+                file << c.pai1[j];
+                if (j < c.pai1.size() - 1)
+                    file << ",";
+            }
+            file << "],";
+
+            file << "\"pai2\": [";
+            for (int j = 0; j < c.pai2.size(); j++)
+            {
+                file << c.pai2[j];
+                if (j < c.pai2.size() - 1)
+                    file << ",";
+            }
+            file << "],";
+
+            file << "\"corte\": "
+                 << c.corte
+                 << ",";
+
+            file << "\"filho1\": [";
+            for (int j = 0; j < c.filho1.size(); j++)
+            {
+                file << c.filho1[j];
+                if (j < c.filho1.size() - 1)
+                    file << ",";
+            }
+            file << "],";
+
+            file << "\"filho2\": [";
+            for (int j = 0; j < c.filho2.size(); j++)
+            {
+                file << c.filho2[j];
+                if (j < c.filho2.size() - 1)
+                    file << ",";
+            }
+            file << "]";
+
+            file << "}";
+
+            if (i < geracao.crossovers.size() - 1)
+                file << ",";
+
+            file << "\n";
+        }
+
+        file << "],\n";
+
+        // ================= MUTAÇÃO =================
+        file << "\"mutacao\": [\n";
+
+        for (int i = 0; i < geracao.mutacoes.size(); i++)
+        {
+            const auto &m = geracao.mutacoes[i];
+
+            file << "{";
+            file << "\"individuo\":" << m.individuo << ",";
+            file << "\"gene\":" << m.gene << ",";
+            file << "\"antes\":" << m.antes << ",";
+            file << "\"depois\":" << m.depois;
+            file << "}";
+
+            if (i < geracao.mutacoes.size() - 1)
+                file << ",";
+
+            file << "\n";
+        }
+
+        file << "],\n";
+
+        // ================= MELHOR =================
+        file << "\"melhor\": {\n";
+
+        file << "\"fitness\": "
+             << geracao.melhor.fitness
+             << ",\n";
+
+        file << "\"cromossomo\": [";
+
+        for (int i = 0; i < geracao.melhor.lotes.size(); i++)
+        {
+            file << geracao.melhor.lotes[i];
+
+            if (i < geracao.melhor.lotes.size() - 1)
+                file << ",";
+        }
+
+        file << "]\n";
+
+        file << "}\n";
+
+        file << "}";
+
+        if (g < historico.size() - 1)
+            file << ",";
+
+        file << "\n";
+    }
 
     file << "}\n";
+
+    file.close();
 }
 
 //================= MAIN =================
@@ -421,8 +713,11 @@ int main()
 
     exibirResultado(resultado, lotes, numMaquinas);
 
-    // salvarJSON(lotes, historico);
-    //
-    // cout << "OK - JSON GERADO\n";
+    salvarJSON(historico, lotes,
+               numLotes,
+               numMaquinas);
+
+    cout << "OK - JSON GERADO\n";
+
     return 0;
 }
