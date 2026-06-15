@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Visualização LPT</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <h1>Algoritmo LPT</h1>
+
+    <h2>Lotes</h2>
+    <p>
+      Gerados aleatoriamente pelo programa, cada lote possui uma quantidade de
+      sapatos e cada sapato possui um tempo específico de colagem.
+    </p>
+    <div id="lotes-container"></div>
+
+    <h2>Lotes Ordenados</h2>
+    <p>
+      O algoritmo ordena os lotes de acordo com o tempo total de colagem,
+      calculado pela multiplicação do tempo unitário pela quantidade de sapatos,
+      de forma decrescente.
+    </p>
+    <div id="lotes-container-ordenado"></div>
+
+    <h2>Distribuição</h2>
+    <p>
+      Por fim, o algoritmo realiza a distribuição de acordo com o tempo de
+      processamento, em ordem decrescente, e atribui cada tarefa à máquina com a
+      menor carga atual.
+    </p>
+    <div id="app"></div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
