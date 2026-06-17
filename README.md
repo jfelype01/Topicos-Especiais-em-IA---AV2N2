@@ -30,8 +30,6 @@ Distribuir os lotes entre as máquinas de forma que:
 - O trabalho fique balanceado
 - O tempo total de produção (*makespan*) seja minimizado
 
----
-
 ## Modelagem
 
 ### Representação Computacional
@@ -128,8 +126,6 @@ Ao final, o melhor indivíduo encontrado é retornado como solução.
 | Taxa de crossover | 80% |
 | Taxa de mutação | 5% |
 
----
-
 ## Tecnologias Utilizadas
 
 - C++
@@ -137,8 +133,6 @@ Ao final, o melhor indivíduo encontrado é retornado como solução.
 - CSS
 - JavaScript
 - JSON
-
----
 
 ## Visualização
 
@@ -152,8 +146,6 @@ A aplicação gera um arquivo JSON contendo:
 - Melhor indivíduo de cada geração
 
 Essas informações são utilizadas pela interface web para demonstrar visualmente o funcionamento do algoritmo genético ao longo das gerações.
-
----
 
 ## Como Executar
 
@@ -188,8 +180,6 @@ python -m http.server 8000
 ```text
 http://localhost:8000
 ```
-
----
 
 ## Equipe 04
 
