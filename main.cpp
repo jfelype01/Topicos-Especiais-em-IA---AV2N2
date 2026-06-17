@@ -18,7 +18,7 @@
 #define MAX_TEMPO 25
 
 #define TAMANHO_TORNEIO 3
-#define QTD_GERACOES 10
+#define QTD_GERACOES 100
 #define POPULACAO 10
 #define TAXA_CROSSOVER 0.8
 #define TAXA_MUTACAO 0.05
